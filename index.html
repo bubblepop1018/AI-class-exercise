@@ -1,0 +1,251 @@
+import React, { useState, useEffect } from 'react';
+import { Sun, Cloud, Wind, Droplets, Shirt, Pants, Dress, Scissors, Palette } from 'lucide-react';
+
+const App = () => {
+  const [temperature, setTemperature] = useState(20);
+  const [season, setSeason] = useState('spring');
+  const [outfit, setOutfit] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // 服装搭配数据
+  const outfitData = {
+    winter: {
+      cold: { temp: '0°C - 10°C', top: '羽绒服/厚毛衣', bottom: '加绒裤/厚牛仔裤', shoes: '雪地靴/保暖靴', accessories: '围巾/手套/帽子' },
+      cool: { temp: '10°C - 15°C', top: '羊毛大衣/厚卫衣', bottom: '牛仔裤/休闲裤', shoes: '短靴/运动鞋', accessories: '围巾/贝雷帽' }
+    },
+    spring: {
+      cool: { temp: '10°C - 18°C', top: '薄外套/针织开衫', bottom: '牛仔裤/休闲裤', shoes: '小白鞋/乐福鞋', accessories: '丝巾/棒球帽' },
+      warm: { temp: '18°C - 25°C', top: '长袖T恤/衬衫', bottom: '九分裤/半身裙', shoes: '帆布鞋/单鞋', accessories: '太阳镜/小包包' }
+    },
+    summer: {
+      hot: { temp: '25°C - 35°C', top: '短袖T恤/背心', bottom: '短裤/连衣裙', shoes: '凉鞋/拖鞋', accessories: '遮阳帽/太阳镜' },
+      veryHot: { temp: '35°C+', top: '无袖上衣/吊带', bottom: '超短裤/轻薄长裙', shoes: '人字拖/凉拖', accessories: '防晒袖套/遮阳伞' }
+    },
+    autumn: {
+      warm: { temp: '18°C - 25°C', top: '薄外套/卫衣', bottom: '牛仔裤/阔腿裤', shoes: '运动鞋/马丁靴', accessories: '围巾/渔夫帽' },
+      cool: { temp: '10°C - 18°C', top: '风衣/夹克', bottom: '加绒裤/长裙', shoes: '短靴/板鞋', accessories: '贝雷帽/小挎包' }
+    }
+  };
+
+  const getWeatherIcon = (temp, season) => {
+    if (season === 'winter') return <Snowflake className="w-8 h-8 text-blue-400" />;
+    if (season === 'summer' && temp > 30) return <Sun className="w-8 h-8 text-yellow-500" />;
+    if (season === 'spring' || season === 'autumn') return <Cloud className="w-8 h-8 text-gray-500" />;
+    return <Sun className="w-8 h-8 text-yellow-500" />;
+  };
+
+  const getOutfitRecommendation = () => {
+    setIsGenerating(true);
+    
+    setTimeout(() => {
+      let category;
+      if (season === 'winter') {
+        category = temperature <= 10 ? 'cold' : 'cool';
+      } else if (season === 'spring') {
+        category = temperature <= 18 ? 'cool' : 'warm';
+      } else if (season === 'summer') {
+        category = temperature <= 30 ? 'hot' : 'veryHot';
+      } else if (season === 'autumn') {
+        category = temperature <= 18 ? 'cool' : 'warm';
+      }
+      
+      setOutfit(outfitData[season][category]);
+      setIsGenerating(false);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    getOutfitRecommendation();
+  }, [temperature, season]);
+
+  const seasonOptions = [
+    { value: 'spring', label: '春季', icon: '🌸', color: 'text-green-500' },
+    { value: 'summer', label: '夏季', icon: '☀️', color: 'text-yellow-500' },
+    { value: 'autumn', label: '秋季', icon: '🍂', color: 'text-orange-500' },
+    { value: 'winter', label: '冬季', icon: '❄️', color: 'text-blue-500' }
+  ];
+
+  const temperatureRanges = {
+    winter: { min: -10, max: 15 },
+    spring: { min: 5, max: 28 },
+    summer: { min: 20, max: 40 },
+    autumn: { min: 5, max: 28 }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex items-center justify-center space-x-3">
+            <Palette className="w-8 h-8 text-purple-600" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              时尚搭配助手
+            </h1>
+          </div>
+          <p className="text-center text-gray-600 mt-2">
+            根据气温和季节，为您推荐最合适的服装搭配
+          </p>
+        </div>
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 py-12">
+        {/* Input Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-12">
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Season Selection */}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                <Scissors className="w-6 h-6 mr-2 text-purple-600" />
+                选择季节
+              </h2>
+              <div className="grid grid-cols-2 gap-4">
+                {seasonOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setSeason(option.value)}
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                      season === option.value
+                        ? 'border-purple-500 bg-purple-50 shadow-md'
+                        : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
+                    }`}
+                  >
+                    <div className="text-2xl mb-2">{option.icon}</div>
+                    <div className={`font-medium ${option.color}`}>
+                      {option.label}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Temperature Control */}
+            <div>
+              <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                <Droplets className="w-6 h-6 mr-2 text-blue-600" />
+                设置气温
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-700">
+                    {temperature}°C
+                  </span>
+                  <div className="flex items-center space-x-2">
+                    {getWeatherIcon(temperature, season)}
+                    <span className="text-sm text-gray-500 capitalize">
+                      {season}
+                    </span>
+                  </div>
+                </div>
+                
+                <input
+                  type="range"
+                  min={temperatureRanges[season].min}
+                  max={temperatureRanges[season].max}
+                  value={temperature}
+                  onChange={(e) => setTemperature(parseInt(e.target.value))}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                
+                <div className="flex justify-between text-sm text-gray-500">
+                  <span>{temperatureRanges[season].min}°C</span>
+                  <span>{temperatureRanges[season].max}°C</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recommendation Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+            <Shirt className="w-6 h-6 mr-2 text-pink-600" />
+            搭配推荐
+          </h2>
+          
+          {isGenerating ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+            </div>
+          ) : outfit ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl">
+                <Shirt className="w-12 h-12 mx-auto text-purple-600 mb-4" />
+                <h3 className="font-semibold text-gray-800 mb-2">上衣</h3>
+                <p className="text-gray-600">{outfit.top}</p>
+              </div>
+              
+              <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+                <Pants className="w-12 h-12 mx-auto text-blue-600 mb-4" />
+                <h3 className="font-semibold text-gray-800 mb-2">下装</h3>
+                <p className="text-gray-600">{outfit.bottom}</p>
+              </div>
+              
+              <div className="text-center p-6 bg-gradient-to-br from-green-50 to-teal-50 rounded-xl">
+                <Dress className="w-12 h-12 mx-auto text-green-600 mb-4" />
+                <h3 className="font-semibold text-gray-800 mb-2">鞋履</h3>
+                <p className="text-gray-600">{outfit.shoes}</p>
+              </div>
+              
+              <div className="text-center p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl">
+                <Wind className="w-12 h-12 mx-auto text-orange-600 mb-4" />
+                <h3 className="font-semibold text-gray-800 mb-2">配饰</h3>
+                <p className="text-gray-600">{outfit.accessories}</p>
+              </div>
+            </div>
+          ) : null}
+
+          {outfit && (
+            <div className="mt-8 p-6 bg-gray-50 rounded-xl">
+              <div className="flex items-center mb-4">
+                <Cloud className="w-5 h-5 text-gray-600 mr-2" />
+                <span className="font-medium text-gray-700">温度范围</span>
+              </div>
+              <p className="text-gray-600 text-lg">{outfit.temp}</p>
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white/80 backdrop-blur-sm border-t mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8 text-center">
+          <p className="text-gray-600">
+            © 2024 时尚搭配助手 - 让每一天的穿搭都充满自信
+          </p>
+        </div>
+      </footer>
+
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+        }
+        
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #8b5cf6;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 6px rgba(139, 92, 246, 0.3);
+        }
+      `}</style>
+    </div>
+  );
+};
+
+// 自定义雪花图标组件
+const Snowflake = ({ className }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2l1.094 3.282 3.464.693-2.702 2.336.806 3.378-3.244-1.947L8.176 12l3.244 1.947-.806 3.378 2.702 2.336-3.464.693L11 22l-1.094-3.282-3.464-.693 2.702-2.336-.806-3.378 3.244 1.947L15.824 12l-3.244-1.947.806-3.378-2.702-2.336 3.464-.693L13 2z"/>
+  </svg>
+);
+
+export default App;
